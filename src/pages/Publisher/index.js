@@ -8,26 +8,43 @@ export default function Publisher(props) {
     const {id}=useParams();
     const [gState]=useContext(ContextNews);
     const [state,setState]=useState([]);
+    const [search,setSearch]=useState("");
+    
     useEffect(()=>{
         const data=gState[id];
         if(Array.isArray(data)){
             data.sort((a,b)=>{
                 return b.TIMESTAMP-a.TIMESTAMP
             })
-            setState(data);
+            if(!search){
+                setState(data);
+            }
+            else{
+                const filterData=data.filter(item=>{
+                    const title=item.TITLE.toLowerCase();
+                    const s=search.toLowerCase();
+                    return title.includes(s);
+                })
+                setState(filterData);
+            }
         }
-    },[])
+    },[search,gState]);
+
+    const handleOnChange=(e)=>{
+        setSearch(e.target.value);
+    }
+
     return (
         <>
            <Typography mb={2} variant='h4'>{id}</Typography>
            <Stack mb={2} direction={"row"} justifyContent={"flex-end"}>
-                <TextField variant="filled" placeholder='search something...'/>
+                <TextField variant="filled" value={search} onChange={handleOnChange} placeholder='search something...'/>
            </Stack>
            <Box>
                 <Grid container spacing={2}>
                 {
-                state.map(item=>(
-                    <Grid item sm={6} xs={12}>
+                state.map((item,index)=>(
+                    <Grid item sm={6} xs={12} key={index}>
                        <Card>
                            <CardContent>
                                <Typography sx={{fontWeight:"bold"}}>{item.TITLE}</Typography>
